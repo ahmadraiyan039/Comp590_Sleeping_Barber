@@ -1,49 +1,54 @@
 import java.util.concurrent.Semaphore;
 
 class DiningPhilosophers {
-    private Semaphore[] forks;
-    private Semaphore diningSemaphore;
+    private Semaphore[] utensils; //Semaphore for the utensils
+    private Semaphore diningSemaphore; //Semaphore to limit the number
 
     public DiningPhilosophers(int numPhilosophers) {
         forks = new Semaphore[numPhilosophers];
         for (int i = 0; i < numPhilosophers; i++) {
-            forks[i] = new Semaphore(1);
+            utensils[i] = new Semaphore(1); //Each fork is available at the beginning
         }
-        diningSemaphore = new Semaphore(numPhilosophers - 1);
+        diningSemaphore = new Semaphore(numPhilosophers - 1); //Limiting philosophers
     }
 
+    //Start dining for individual philosophers
     public void startDining(int philosopherId) {
         try {
             while (true) {
-                think(philosopherId);
-                takeForks(philosopherId);
-                eat(philosopherId);
-                putForks(philosopherId);
+                startThinking(philosopherId);
+                takeUtensils(philosopherId);
+                startEating(philosopherId);
+                putUtensils(philosopherId);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    private void think(int philosopherId) throws InterruptedException {
+    //Simulates the philosophers thinking
+    private void startThinking(int philosopherId) throws InterruptedException {
         System.out.println("Philosopher " + philosopherId + " is thinking.");
         Thread.sleep(1000); // Simulating thinking
     }
 
-    private void takeForks(int philosopherId) throws InterruptedException {
+    //Simulate individual philosopher picking up utensils
+    private void takeUtensils(int philosopherId) throws InterruptedException {
         diningSemaphore.acquire();
-        forks[philosopherId].acquire();
-        forks[(philosopherId + 1) % forks.length].acquire();
+        utensils[philosopherId].acquire(); //Picking up left utensil
+        utensils[(philosopherId + 1) % forks.length].acquire(); //picking up right utensil
     }
 
-    private void eat(int philosopherId) throws InterruptedException {
+    //Philosopher eating
+    private void startEating(int philosopherId) throws InterruptedException {
         System.out.println("Philosopher " + philosopherId + " is eating.");
         Thread.sleep(1000); // Simulating eating
     }
 
-    private void putForks(int philosopherId) {
-        forks[philosopherId].release();
-        forks[(philosopherId + 1) % forks.length].release();
+    //Putting back utensils
+    private void putUtensils(int philosopherId) {
+        utensils[philosopherId].release();
+        utensils[(philosopherId + 1) % forks.length].release(); //Releasing utensils
         diningSemaphore.release();
     }
 }
